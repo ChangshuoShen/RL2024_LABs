@@ -2,7 +2,6 @@ import gym
 import matplotlib
 import numpy as np
 import sys
-
 from collections import defaultdict
 
 if "../" not in sys.path:
@@ -28,7 +27,6 @@ def make_epsilon_greedy_policy(Q, epsilon, nA):
     Returns:
         A function that takes the observation as an argument and returns
         the probabilities for each action in the form of a numpy array of length nA.
-    
     """
     def policy_fn(observation):
         A = np.ones(nA, dtype=float) * epsilon / nA

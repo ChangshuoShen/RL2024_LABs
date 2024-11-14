@@ -1,7 +1,8 @@
 import numpy as np
 import sys
+
 if "../" not in sys.path:
-  sys.path.append("../") 
+    sys.path.append("../") 
 from lib.envs.blackjack import BlackjackEnv
 
 # creat env
