@@ -3,6 +3,7 @@ from gym import spaces
 from gym.utils import seeding
 
 def cmp(a, b):
+    # 比较函数，返回1, 0, -1
     return int((a > b)) - int((a < b))
 
 # 1 = Ace, 2-10 = Number cards, Jack/Queen/King = 10
@@ -10,14 +11,18 @@ deck = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
 
 
 def draw_card(np_random):
+    # 抽牌
     return np_random.choice(deck)
 
 
 def draw_hand(np_random):
+    # 抽两张牌做一手牌
     return [draw_card(np_random), draw_card(np_random)]
 
 
-def usable_ace(hand):  # Does this hand have a usable ace?
+def usable_ace(hand):  
+    # Does this hand have a usable ace?
+    # 检查手中是否有可用的Ace以及综合不超过21
     return 1 in hand and sum(hand) + 10 <= 21
 
 
@@ -27,7 +32,7 @@ def sum_hand(hand):  # Return current hand total
     return sum(hand)
 
 
-def is_bust(hand):  # Is this hand a bust?
+def is_bust(hand):  # Is this hand a bust爆掉?
     return sum_hand(hand) > 21
 
 
@@ -65,7 +70,10 @@ class BlackjackEnv(gym.Env):
     https://webdocs.cs.ualberta.ca/~sutton/book/the-book.html
     """
     def __init__(self, natural=False):
+        # 定义动作空间 (0停止 1继续要牌)
         self.action_space = spaces.Discrete(2)
+        
+        # 定义观察空间 (玩家点数、 庄家明牌、 是否有可用Ace)
         self.observation_space = spaces.Tuple((
             spaces.Discrete(32),
             spaces.Discrete(11),
@@ -80,38 +88,49 @@ class BlackjackEnv(gym.Env):
         self.nA = 2
 
     def reset(self):
+        # 重置环境并返回初始观察
         return self._reset()
 
     def step(self, action):
+        # 执行动作并返回新的观察、奖励、是否结束、额外信息
         return self._step(action)
 
     def _seed(self, seed=None):
+        # 设置随机数种子
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
     def _step(self, action):
         assert self.action_space.contains(action)
+        
         if action:  # hit: add a card to players hand and return
             self.player.append(draw_card(self.np_random))
             if is_bust(self.player):
                 done = True
-                reward = -1
+                reward = -1 # 爆掉就-1
             else:
                 done = False
-                reward = 0
+                reward = 0 # 没爆掉，奖励为0继续游戏
+                
         else:  # stick: play out the dealers hand, and score
             done = True
+            # 庄家一直抽牌到 >= 17
             while sum_hand(self.dealer) < 17:
                 self.dealer.append(draw_card(self.np_random))
+            # 比较双方点数
             reward = cmp(score(self.player), score(self.dealer))
+            
+            # 自然获胜，得1.5在
             if self.natural and is_natural(self.player) and reward == 1:
                 reward = 1.5
         return self._get_obs(), reward, done, {}
 
     def _get_obs(self):
+        # observation 返回当前观察状态
         return (sum_hand(self.player), self.dealer[0], usable_ace(self.player))
 
     def _reset(self):
+        # 重置，各抽两张牌
         self.dealer = draw_hand(self.np_random)
         self.player = draw_hand(self.np_random)
 

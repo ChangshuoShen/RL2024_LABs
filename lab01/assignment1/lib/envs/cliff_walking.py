@@ -1,18 +1,24 @@
 import numpy as np
 import sys
+from io import StringIO
 from gym.envs.toy_text import discrete
 
-
+# 动作常量
 UP = 0
 RIGHT = 1
 DOWN = 2
 LEFT = 3
 
 class CliffWalkingEnv(discrete.DiscreteEnv):
-
+    '''
+    Cliff Walking 环境类，继承自 gym 的离散环境。
+    该环境模拟了一种走到悬崖边缘的情境，目标是从起点 (3, 0) 移动到目标 (3, 11)，
+    但在悬崖区域（3, 1) 到 (3, 10) 之间掉落会导致大惩罚。
+    '''
     metadata = {'render.modes': ['human', 'ansi']}
 
     def _limit_coordinates(self, coord):
+        '''限制坐标在环境的边界内'''
         coord[0] = min(coord[0], self.shape[0] - 1)
         coord[0] = max(coord[0], 0)
         coord[1] = min(coord[1], self.shape[1] - 1)
@@ -20,9 +26,12 @@ class CliffWalkingEnv(discrete.DiscreteEnv):
         return coord
 
     def _calculate_transition_prob(self, current, delta):
+        '''计算状态转移概率'''
         new_position = np.array(current) + np.array(delta)
         new_position = self._limit_coordinates(new_position).astype(int)
         new_state = np.ravel_multi_index(tuple(new_position), self.shape)
+        
+        # 在悬崖上直接-100否则-1(正常行走)
         reward = -100.0 if self._cliff[tuple(new_position)] else -1.0
         is_done = self._cliff[tuple(new_position)] or (tuple(new_position) == (3,11))
         return [(1.0, new_state, reward, is_done)]
@@ -33,7 +42,7 @@ class CliffWalkingEnv(discrete.DiscreteEnv):
         nS = np.prod(self.shape)
         nA = 4
 
-        # Cliff Location
+        # Cliff Location悬崖位置的Bool数组
         self._cliff = np.zeros(self.shape, dtype=np.bool)
         self._cliff[3, 1:-1] = True
 
