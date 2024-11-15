@@ -82,7 +82,7 @@ def mc(env, num_episodes, discount_factor=1.0, epsilon=0.1):
             while not done:
                 action_probs = policy(state) # 根据当前策略选择动作概率
                 action = np.random.choice(np.arange(len(action_probs)), p=action_probs) # 根据action_probs来选择动作
-                next_state, reward, done = env.step(action) # 执行动作并获得下一步的状态、奖励等
+                next_state, reward, done, _ = env.step(action) # 执行动作并获得下一步的状态、奖励等
                 episode.append((state, action, reward)) # 存储`状态-动作-奖励`
                 state = next_state
         # step 2 : Find all (state, action) pairs we've visited in this episode
