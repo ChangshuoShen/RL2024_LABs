@@ -76,14 +76,15 @@ def sarsa(env, num_episodes, discount_factor=1.0, alpha=0.5, epsilon=0.1):
         # Reset the environment
         state = env.reset()
         
-        action_probs = policy(state)
-        action = np.random.choice(
-            np.arange(len(action_probs), p=action_probs)
-        )
+        
         # One step in the environment
         for t in itertools.count():
 #########################################Implement your code here#######################################################################################
             # step 1 : Take a step( 1 line code, tips : env.step() )
+            action_probs = policy(state)
+            action = np.random.choice(
+                np.arange(len(action_probs)), p=action_probs
+            )
             next_state, reward, done, _ = env.step(action)
             
             # step 2 : Pick the next action

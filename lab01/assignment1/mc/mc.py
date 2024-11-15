@@ -2,6 +2,7 @@ import gym
 import matplotlib
 import numpy as np
 import sys
+import time
 from collections import defaultdict
 
 if "../" not in sys.path:
@@ -106,23 +107,72 @@ def mc(env, num_episodes, discount_factor=1.0, epsilon=0.1):
                 returns_count[(state, action)] += 1  # 更新计数
                 Q[state][action] = returns_sum[(state, action)] / returns_count[(state, action)]  # 更新 Q 值
                 policy = make_epsilon_greedy_policy(Q, epsilon, env.action_space.n)  # 更新策略
-                        
-        # every visit
-            # G = 0 # 这个是用来表示state之后的reward总和，带上折扣因子
-            # for state, action, reward in reversed(episode):
-            #     G = reward + discount_factor * G
-            #     if (state, action) not in visited_pairs:
-            #         returns_sum[(state, action)] += G # 累积回报
-            #         returns_count[(state, action)] += 1  # 更新计数
-            #         Q[state][action] = returns_sum[(state, action)] / returns_count[(state, action)]  #更新Q值
-                    
-            #         policy = make_epsilon_greedy_policy(Q, epsilon, env.action_space.n) # 更新策略
-                    
  #############################################Implement your code end###################################################################################################
     return Q, policy
 
 
+def mc_every_visit(env, num_episodes, discount_factor=1.0, epsilon=0.1):
+    """
+    Monte Carlo Control using Epsilon-Greedy policies.
+    Finds an optimal epsilon-greedy policy.
+    """
+    
+    returns_sum = defaultdict(float)
+    returns_count = defaultdict(float)
+    Q = defaultdict(lambda: np.zeros(env.action_space.n))
+    policy = make_epsilon_greedy_policy(Q, epsilon, env.action_space.n)
+    
+    for i_episode in range(1, num_episodes + 1):
+        if i_episode % 1000 == 0:
+            print("\rEpisode {}/{}.".format(i_episode, num_episodes), end="")
+            sys.stdout.flush()
+
+        # Step 1: Generate an episode
+        episode = []
+        state = env.reset()
+        done = False
+        
+        while not done:
+            action_probs = policy(state)
+            action = np.random.choice(np.arange(len(action_probs)), p=action_probs)
+            next_state, reward, done, _ = env.step(action)
+            episode.append((state, action, reward))
+            state = next_state
+
+        # Step 2: Calculate returns for each (state, action) pair
+        G = 0
+        # Reverse iterate over the episode
+        for state, action, reward in reversed(episode):
+            G = reward + discount_factor * G
+            returns_sum[(state, action)] += G
+            returns_count[(state, action)] += 1
+            Q[state][action] = returns_sum[(state, action)] / returns_count[(state, action)]
+            
+            # Update policy
+            policy = make_epsilon_greedy_policy(Q, epsilon, env.action_space.n)
+
+    return Q, policy
+
+
+start_time = time.time()
 Q, policy = mc(env, num_episodes=500000, epsilon=0.1)
+first_visit_time = time.time() - start_time
+print(f"\nFirst-Visit Monte Carlo took {first_visit_time:.2f} seconds.")
+
+# For plotting: Create value function from action-value function
+# by picking the best action at each state 从动作价值函数创建值函数
+V = defaultdict(float)
+for state, actions in Q.items():
+    action_value = np.max(actions) # 选择最大动作值
+    V[state] = action_value # 更新值函数
+# 绘制最佳值函数
+plotting.plot_value_function(V, title="Optimal Value Function")
+
+
+start_time = time.time()
+Q, policy = mc_every_visit(env, num_episodes=500000, epsilon=0.1)
+every_visit_time = time.time() - start_time
+print(f"\nEvery-Visit Monte Carlo took {every_visit_time:.2f} seconds.")
 
 # For plotting: Create value function from action-value function
 # by picking the best action at each state 从动作价值函数创建值函数

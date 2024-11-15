@@ -97,8 +97,8 @@ def plot_episode_stats(stats, smoothing_window=10, noshow=False):
     plt.title("Episode Length over Time")  # 设置图表标题
     if noshow:
         plt.close(fig1)  # 如果 noshow 为 True，关闭图形
-    else:
-        plt.show(fig1)  # 显示图形
+    # else:
+    #     plt.show(fig1)  # 显示图形
 
     # 绘制每个回合的奖励随时间变化的图
     fig2 = plt.figure(figsize=(10, 5))
@@ -109,8 +109,8 @@ def plot_episode_stats(stats, smoothing_window=10, noshow=False):
     plt.title("Episode Reward over Time (Smoothed over window size {})".format(smoothing_window))  # 设置图表标题
     if noshow:
         plt.close(fig2)  # 如果 noshow 为 True，关闭图形
-    else:
-        plt.show(fig2)  # 显示图形
+    # else:
+    #     plt.show(fig2)  # 显示图形
 
     # 绘制时间步长与回合数量的关系
     fig3 = plt.figure(figsize=(10, 5))
@@ -120,7 +120,7 @@ def plot_episode_stats(stats, smoothing_window=10, noshow=False):
     plt.title("Episode per time step")  # 设置图表标题
     if noshow:
         plt.close(fig3)  # 如果 noshow 为 True，关闭图形
-    else:
-        plt.show(fig3)  # 显示图形
-
+    # else:
+    #     plt.show(fig3)  # 显示图形
+    plt.show()
     return fig1, fig2, fig3  # 返回所有生成的图形
