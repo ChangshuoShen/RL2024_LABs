@@ -75,20 +75,35 @@ def sarsa(env, num_episodes, discount_factor=1.0, alpha=0.5, epsilon=0.1):
 
         # Reset the environment
         state = env.reset()
-
+        
+        action_probs = policy(state)
+        action = np.random.choice(
+            np.arange(len(action_probs), p=action_probs)
+        )
         # One step in the environment
         for t in itertools.count():
 #########################################Implement your code here#######################################################################################
             # step 1 : Take a step( 1 line code, tips : env.step() )
+            next_state, reward, done, _ = env.step(action)
             
             # step 2 : Pick the next action
-            
             # Update statistics
             stats.episode_rewards[i_episode] += reward
             stats.episode_lengths[i_episode] = t
             
+            if done:
+                Q[state][action] += alpha * (reward - Q[state][action])
+                break
+            
+            next_action_probs = policy(next_state)
+            next_action = np.random.choice(np.arange(len(next_action_probs)), p=next_action_probs)
+
             # step 3 : TD Update
+            # TD Update
             # compute Q value      
+            Q[state][action] += alpha * (reward + discount_factor * Q[next_state][next_action] - Q[state][action])
+            
+            state, action = next_state, next_action
 
 #########################################Implement your code here end#####################################################################################
     return Q, stats
