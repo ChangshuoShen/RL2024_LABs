@@ -98,9 +98,11 @@ def sarsa(env, num_episodes, discount_factor=1.0, alpha=0.5, epsilon=0.1):
 
             # step 3 : TD Update
             # compute Q value      
-            if next_state not in Q or next_action not in Q[next_state]:
-                Q[next_state][next_action] = 0
-    
+            
+            # if next_state not in Q or next_action not in Q[next_state]:
+            #     Q[next_state][next_action] = 0
+            # 这一句多此一举
+            
             Q[state][action] += alpha * (
                 reward + discount_factor * Q[next_state][next_action] - Q[state][action]
             )
@@ -111,7 +113,8 @@ def sarsa(env, num_episodes, discount_factor=1.0, alpha=0.5, epsilon=0.1):
 #########################################Implement your code here end#####################################################################################
     return Q, stats
 
-
-Q, stats = sarsa(env, 1000)
-
-plotting.plot_episode_stats(stats, file_name='episode_stats_sarsa')
+if __name__ == '__main__':
+    Q, stats = sarsa(env, 1000)
+    plotting.plot_episode_stats(stats, file_name='episode_stats_sarsa')
+    
+    

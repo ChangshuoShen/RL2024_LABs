@@ -146,12 +146,30 @@ def double_q_learning(env, num_episodes, discount_factor=1.0, alpha=0.5, epsilon
                 
     return Q1, Q2, stats
 
-print(' #'*20, '\n', 'Q-Learning', '\n', ' #'*20)
-Q, stats = q_learning(env, 1000)
 
-plotting.plot_episode_stats(stats, file_name='episode_stats_q_learning')
+import sarsa
 
-print(' #'*20, '\n', 'Double Q-Learning', '\n', ' #'*20)
-Q1, Q2, stats =double_q_learning(env, 1000)
+def run_all_td_algs_and_compare():
+    Q3, sarsa_stats = sarsa.sarsa(env, 1000)
+    Q1, qlearning_stats = q_learning(env, 1000)
+    Q2, Q3, double_qlearning_stats = double_q_learning(env, 1000)
+    
+    stats_dict = {
+        'SARSA': sarsa_stats,
+        'Q-Learning': qlearning_stats,
+        'Double Q-Learning': double_qlearning_stats
+    }
 
-plotting.plot_episode_stats(stats, file_name='episode_stats_double_q_learning')
+    plotting.plot_multiple_episode_stats(stats_dict)
+
+if __name__ == '__main__':
+    run_all_td_algs_and_compare()
+    # print(' #'*20, '\n', 'Q-Learning', '\n', ' #'*20)
+    # Q, stats = q_learning(env, 1000)
+
+    # plotting.plot_episode_stats(stats, file_name='episode_stats_q_learning')
+
+    # print(' #'*20, '\n', 'Double Q-Learning', '\n', ' #'*20)
+    # Q1, Q2, stats =double_q_learning(env, 1000)
+
+    # plotting.plot_episode_stats(stats, file_name='episode_stats_double_q_learning')

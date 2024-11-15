@@ -136,3 +136,58 @@ def plot_episode_stats(stats, smoothing_window=10, file_name='episode_stats', no
     #     plt.show(fig3)  # 显示图形
     # plt.show()
     return fig1, fig2, fig3  # 返回所有生成的图形
+
+def plot_multiple_episode_stats(stats_dict, smoothing_window=10, file_name='episode_stats_compare', noshow=True):
+    """
+    绘制多个算法在同一环境下的统计信息。
+    
+    参数:
+        stats_dict: 一个字典,其中key为算法名称,value为EpisodeStats实例
+        smoothing_window: 平滑窗口大小
+        file_name: 保存图像的文件名前缀
+        noshow: 如果为 True,则不显示图表
+    """
+    # 创建保存图像的目录
+    os.makedirs('./figures/', exist_ok=True)
+    
+    # 设置颜色列表
+    colors = ['blue', 'orange', 'purple', 'red',  'green', 'brown']
+
+    # 绘制每个回合的长度随时间变化的图
+    fig1 = plt.figure(figsize=(10, 5))
+    for i, (algo_name, stats) in enumerate(stats_dict.items()):
+        plt.plot(stats.episode_lengths, color=colors[i], label=algo_name, alpha=0.7)
+    plt.xlabel("Episode")
+    plt.ylabel("Episode Length")
+    plt.title("Episode Length over Time")
+    plt.legend()
+    plt.savefig(f"./figures/{file_name}_length.png", bbox_inches='tight')
+    if noshow:
+        plt.close(fig1)
+
+    # 绘制每个回合的奖励随时间变化的图
+    fig2 = plt.figure(figsize=(10, 5))
+    for i, (algo_name, stats) in enumerate(stats_dict.items()):
+        rewards_smoothed = pd.Series(stats.episode_rewards).rolling(smoothing_window, min_periods=smoothing_window).mean()
+        plt.plot(rewards_smoothed, color=colors[i], label=algo_name, alpha=0.7)
+    plt.xlabel("Episode")
+    plt.ylabel("Episode Reward (Smoothed)")
+    plt.title(f"Episode Reward over Time (Smoothed over window size {smoothing_window})")
+    plt.legend()
+    plt.savefig(f"./figures/{file_name}_reward.png", bbox_inches='tight')
+    if noshow:
+        plt.close(fig2)
+
+    # 绘制时间步长与回合数量的关系
+    fig3 = plt.figure(figsize=(10, 5))
+    for i, (algo_name, stats) in enumerate(stats_dict.items()):
+        plt.plot(np.cumsum(stats.episode_lengths), np.arange(len(stats.episode_lengths)), color=colors[i], label=algo_name, alpha=0.7)
+    plt.xlabel("Time Steps")
+    plt.ylabel("Episode")
+    plt.title("Episode per time step")
+    plt.legend()
+    plt.savefig(f"./figures/{file_name}_timesteps.png", bbox_inches='tight')
+    if noshow:
+        plt.close(fig3)
+
+    return fig1, fig2, fig3
