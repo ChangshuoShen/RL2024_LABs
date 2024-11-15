@@ -64,7 +64,8 @@ def q_learning(env, num_episodes, discount_factor=1.0, alpha=0.5, epsilon=0.1):
     # Keeps track of useful statistics
     stats = plotting.EpisodeStats(
         episode_lengths=np.zeros(num_episodes),
-        episode_rewards=np.zeros(num_episodes))    
+        episode_rewards=np.zeros(num_episodes)
+    )    
     
     # The policy we're following
     policy = make_epsilon_greedy_policy(Q, epsilon, env.action_space.n)
@@ -93,7 +94,9 @@ def q_learning(env, num_episodes, discount_factor=1.0, alpha=0.5, epsilon=0.1):
             
             # step 2 : TD Update
             best_next_action = np.argmax(Q[next_state])
-            Q[state][action] += alpha * (reward + discount_factor * Q[next_state][best_next_action] - Q[state][action])
+            Q[state][action] += alpha * (
+                reward + discount_factor * Q[next_state][best_next_action] - Q[state][action]
+            )
 
             state = next_state
             
@@ -129,10 +132,12 @@ def double_q_learning(env, num_episodes, discount_factor=1.0, alpha=0.5, epsilon
             # Choose which Q value to update
             if np.random.rand() < 0.5:
                 best_next_action = np.argmax(Q2[next_state])
-                Q1[state][action] += alpha * (reward + discount_factor * Q2[next_state][best_next_action] - Q1[state][action])
+                Q1[state][action] += alpha * (
+                    reward + discount_factor * Q2[next_state][best_next_action] - Q1[state][action])
             else:
                 best_next_action = np.argmax(Q1[next_state])
-                Q2[state][action] += alpha * (reward + discount_factor * Q1[next_state][best_next_action] - Q2[state][action])
+                Q2[state][action] += alpha * (
+                    reward + discount_factor * Q1[next_state][best_next_action] - Q2[state][action])
 
             state = next_state
             

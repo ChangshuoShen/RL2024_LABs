@@ -76,7 +76,6 @@ def sarsa(env, num_episodes, discount_factor=1.0, alpha=0.5, epsilon=0.1):
         # Reset the environment
         state = env.reset()
         
-        
         # One step in the environment
         for t in itertools.count():
 #########################################Implement your code here#######################################################################################
@@ -92,14 +91,19 @@ def sarsa(env, num_episodes, discount_factor=1.0, alpha=0.5, epsilon=0.1):
             stats.episode_rewards[i_episode] += reward
             stats.episode_lengths[i_episode] = t
 
-            Q[state][action] += alpha * (reward - Q[state][action])
             next_action_probs = policy(next_state)
-            next_action = np.random.choice(np.arange(len(next_action_probs)), p=next_action_probs)
+            next_action = np.random.choice(
+                np.arange(len(next_action_probs)), p=next_action_probs
+            )
 
             # step 3 : TD Update
-            # TD Update
             # compute Q value      
-            Q[state][action] += alpha * (reward + discount_factor * Q[next_state][next_action] - Q[state][action])
+            if next_state not in Q or next_action not in Q[next_state]:
+                Q[next_state][next_action] = 0
+    
+            Q[state][action] += alpha * (
+                reward + discount_factor * Q[next_state][next_action] - Q[state][action]
+            )
             
             state, action = next_state, next_action
             if done:
