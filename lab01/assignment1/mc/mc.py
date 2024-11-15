@@ -36,7 +36,7 @@ def make_epsilon_greedy_policy(Q, epsilon, nA):
         return A
     return policy_fn
 
-def mc(env, num_episodes, discount_factor=1.0, epsilon=0.1):
+def mc_first_visit(env, num_episodes, discount_factor=1.0, epsilon=0.1):
     """
     Monte Carlo Control using Epsilon-Greedy policies.
     Finds an optimal epsilon-greedy policy.
@@ -153,32 +153,37 @@ def mc_every_visit(env, num_episodes, discount_factor=1.0, epsilon=0.1):
 
     return Q, policy
 
+print(' #'*20, '\n', 'First-Visit Monte Carlo', '\n', ' #'*20)
+for num_episodes in [
+    10_000, 100_000, 500_000, 1_000_000, 10_000_000, 50_000_000, 100_000_000, 500_000_000]:
+    
+    start_time = time.time()
+    Q, policy = mc_first_visit(env, num_episodes=num_episodes, epsilon=0.1)
+    first_visit_time = time.time() - start_time
+    print(f"\nFirst-Visit Monte Carlo (Num Episodes: {num_episodes}) took {first_visit_time:.2f} seconds.")
 
-start_time = time.time()
-Q, policy = mc(env, num_episodes=500000, epsilon=0.1)
-first_visit_time = time.time() - start_time
-print(f"\nFirst-Visit Monte Carlo took {first_visit_time:.2f} seconds.")
+    # 从动作价值函数创建值函数
+    V = defaultdict(float)
+    for state, actions in Q.items():
+        action_value = np.max(actions) # 选择最大动作值
+        V[state] = action_value # 更新值函数
+    # 绘制最佳值函数
+    plotting.plot_value_function(V, title="Optimal Value Function", file_name=f"First_Visit_Value_Function_Episodes_{num_episodes}")
 
-# For plotting: Create value function from action-value function
-# by picking the best action at each state 从动作价值函数创建值函数
-V = defaultdict(float)
-for state, actions in Q.items():
-    action_value = np.max(actions) # 选择最大动作值
-    V[state] = action_value # 更新值函数
-# 绘制最佳值函数
-plotting.plot_value_function(V, title="Optimal Value Function")
+print(' #'*20, '\n', 'Every-Visit Monte Carlo', '\n', ' #'*20)
 
+for num_episodes in [
+    10_000, 50_000, 100_000, 500_000, 1_000_000]:
+    
+    start_time = time.time()
+    Q, policy = mc_every_visit(env, num_episodes=num_episodes, epsilon=0.1)
+    every_visit_time = time.time() - start_time
+    print(f"\nEvery-Visit Monte Carlo (Num Episodes: {num_episodes}) took {every_visit_time:.2f} seconds.")
 
-start_time = time.time()
-Q, policy = mc_every_visit(env, num_episodes=500000, epsilon=0.1)
-every_visit_time = time.time() - start_time
-print(f"\nEvery-Visit Monte Carlo took {every_visit_time:.2f} seconds.")
-
-# For plotting: Create value function from action-value function
-# by picking the best action at each state 从动作价值函数创建值函数
-V = defaultdict(float)
-for state, actions in Q.items():
-    action_value = np.max(actions) # 选择最大动作值
-    V[state] = action_value # 更新值函数
-# 绘制最佳值函数
-plotting.plot_value_function(V, title="Optimal Value Function")
+    # 从动作价值函数创建值函数
+    V = defaultdict(float)
+    for state, actions in Q.items():
+        action_value = np.max(actions) # 选择最大动作值
+        V[state] = action_value # 更新值函数
+    # 绘制最佳值函数
+    plotting.plot_value_function(V, title="Optimal Value Function",file_name=f"Every_Visit_Value_Function_Episodes_{num_episodes}")

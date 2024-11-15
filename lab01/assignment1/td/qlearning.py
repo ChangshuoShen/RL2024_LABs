@@ -141,10 +141,12 @@ def double_q_learning(env, num_episodes, discount_factor=1.0, alpha=0.5, epsilon
                 
     return Q1, Q2, stats
 
-Q, stats = q_learning(env, 500)
+print(' #'*20, '\n', 'Q-Learning', '\n', ' #'*20)
+Q, stats = q_learning(env, 1000)
 
-plotting.plot_episode_stats(stats)
+plotting.plot_episode_stats(stats, file_name='episode_stats_q_learning')
 
+print(' #'*20, '\n', 'Double Q-Learning', '\n', ' #'*20)
 Q1, Q2, stats =double_q_learning(env, 1000)
 
-plotting.plot_episode_stats(stats)
+plotting.plot_episode_stats(stats, file_name='episode_stats_double_q_learning')

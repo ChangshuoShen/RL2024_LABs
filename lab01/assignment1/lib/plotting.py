@@ -1,6 +1,7 @@
 import matplotlib
 import numpy as np
 import pandas as pd
+import os
 from collections import namedtuple
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -38,14 +39,17 @@ def plot_cost_to_go_mountain_car(env, estimator, num_tiles=20):
     plt.show()  # 显示图形
 
 
-def plot_value_function(V, title="Value Function"):
+def plot_value_function(V, title="Value Function", file_name="value_function"):
     """
     绘制值函数的表面图。
     
     参数:
         V: 值函数，映射状态到值
         title: 图表标题
+        file_name: 保存图像的文件名
     """
+    os.makedirs('./figures/', exist_ok=True)
+    
     # 确定 x 和 y 的范围
     min_x = min(k[0] for k in V.keys())
     max_x = max(k[0] for k in V.keys())
@@ -61,7 +65,7 @@ def plot_value_function(V, title="Value Function"):
     Z_noace = np.apply_along_axis(lambda _: V[(_[0], _[1], False)], 2, np.dstack([X, Y]))  # 没有可用 A 的情况
     Z_ace = np.apply_along_axis(lambda _: V[(_[0], _[1], True)], 2, np.dstack([X, Y]))  # 有可用 A 的情况
 
-    def plot_surface(X, Y, Z, title):
+    def plot_surface(X, Y, Z, title, file_name):
         """绘制 3D 表面图的辅助函数。"""
         fig = plt.figure(figsize=(20, 10))
         ax = fig.add_subplot(111, projection='3d')
@@ -73,14 +77,16 @@ def plot_value_function(V, title="Value Function"):
         ax.set_title(title)  # 设置图表标题
         ax.view_init(ax.elev, -120)  # 设置视角
         fig.colorbar(surf)  # 添加颜色条
-        plt.show()  # 显示图形
+        plt.savefig(f"./figures/{file_name}", bbox_inches='tight')  # 保存图像到指定路径
+        plt.close(fig)  # 关闭图形以释放内存
+        # plt.show()  # 显示图形
 
     # 绘制两种情况下的值函数
-    plot_surface(X, Y, Z_noace, "{} (No Usable Ace)".format(title))
-    plot_surface(X, Y, Z_ace, "{} (Usable Ace)".format(title))
+    plot_surface(X, Y, Z_noace, "{} (No Usable Ace)".format(title), f"{file_name}_no_ace.png")
+    plot_surface(X, Y, Z_ace, "{} (Usable Ace)".format(title), f"{file_name}_ace.png")
 
 
-def plot_episode_stats(stats, smoothing_window=10, noshow=False):
+def plot_episode_stats(stats, smoothing_window=10, file_name='episode_stats', noshow=True):
     """
     绘制每个回合的统计信息。
     
@@ -89,12 +95,16 @@ def plot_episode_stats(stats, smoothing_window=10, noshow=False):
         smoothing_window: 平滑窗口大小
         noshow: 如果为 True，则不显示图表
     """
+    # 创建保存图像的目录
+    os.makedirs('./figures/', exist_ok=True)
+    
     # 绘制每个回合的长度随时间变化的图
     fig1 = plt.figure(figsize=(10, 5))
     plt.plot(stats.episode_lengths)  # 绘制回合长度
     plt.xlabel("Episode")  # 设置 x 轴标签
     plt.ylabel("Episode Length")  # 设置 y 轴标签
     plt.title("Episode Length over Time")  # 设置图表标题
+    plt.savefig(f"./figures/{file_name}_length.png", bbox_inches='tight')  # 保存图像
     if noshow:
         plt.close(fig1)  # 如果 noshow 为 True，关闭图形
     # else:
@@ -107,6 +117,7 @@ def plot_episode_stats(stats, smoothing_window=10, noshow=False):
     plt.xlabel("Episode")  # 设置 x 轴标签
     plt.ylabel("Episode Reward (Smoothed)")  # 设置 y 轴标签
     plt.title("Episode Reward over Time (Smoothed over window size {})".format(smoothing_window))  # 设置图表标题
+    plt.savefig(f"./figures/{file_name}_reward.png", bbox_inches='tight')  # 保存图像
     if noshow:
         plt.close(fig2)  # 如果 noshow 为 True，关闭图形
     # else:
@@ -118,9 +129,10 @@ def plot_episode_stats(stats, smoothing_window=10, noshow=False):
     plt.xlabel("Time Steps")  # 设置 x 轴标签
     plt.ylabel("Episode")  # 设置 y 轴标签
     plt.title("Episode per time step")  # 设置图表标题
+    plt.savefig(f"./figures/{file_name}_timesteps.png", bbox_inches='tight')  # 保存图像
     if noshow:
         plt.close(fig3)  # 如果 noshow 为 True，关闭图形
     # else:
     #     plt.show(fig3)  # 显示图形
-    plt.show()
+    # plt.show()
     return fig1, fig2, fig3  # 返回所有生成的图形

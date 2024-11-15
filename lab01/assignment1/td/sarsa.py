@@ -91,11 +91,8 @@ def sarsa(env, num_episodes, discount_factor=1.0, alpha=0.5, epsilon=0.1):
             # Update statistics
             stats.episode_rewards[i_episode] += reward
             stats.episode_lengths[i_episode] = t
-            
-            if done:
-                Q[state][action] += alpha * (reward - Q[state][action])
-                break
-            
+
+            Q[state][action] += alpha * (reward - Q[state][action])
             next_action_probs = policy(next_state)
             next_action = np.random.choice(np.arange(len(next_action_probs)), p=next_action_probs)
 
@@ -105,11 +102,12 @@ def sarsa(env, num_episodes, discount_factor=1.0, alpha=0.5, epsilon=0.1):
             Q[state][action] += alpha * (reward + discount_factor * Q[next_state][next_action] - Q[state][action])
             
             state, action = next_state, next_action
-
+            if done:
+                break
 #########################################Implement your code here end#####################################################################################
     return Q, stats
 
 
-Q, stats = sarsa(env, 500)
+Q, stats = sarsa(env, 1000)
 
-plotting.plot_episode_stats(stats)
+plotting.plot_episode_stats(stats, file_name='episode_stats_sarsa')
