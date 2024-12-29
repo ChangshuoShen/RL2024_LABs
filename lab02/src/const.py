@@ -18,6 +18,7 @@ TEST = False                 # 是否处于测试模式
 
 # 初始化设备
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print('using device:', DEVICE)
 
 # 创建保存路径
 os.makedirs(f"{SAVE_PATH_PREFIX}/ckpt", exist_ok=True)

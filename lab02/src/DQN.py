@@ -4,6 +4,7 @@ from src.model import DQN, Data
 from src.const import *
 from src.utils import set_random_seed
 from torch.utils.tensorboard import SummaryWriter
+from tqdm import tqdm  # 引入 tqdm 进度条
 import numpy as np
 
 def train_dqn(env_name, episodes, batch_size, epsilon, min_epsilon, decay_rate):
@@ -32,8 +33,8 @@ def train_dqn(env_name, episodes, batch_size, epsilon, min_epsilon, decay_rate):
     # 初始化 TensorBoard Writer
     writer = SummaryWriter(f'{SAVE_PATH_PREFIX}/{env_name}')
 
-    # 开始训练
-    for episode in range(episodes):
+    # 开始训练，使用 tqdm 显示训练进度
+    for episode in tqdm(range(episodes), desc=f"Training DQN on {env_name}", unit="episode"):
         state, _ = env.reset(seed=SEED)  # 重置环境，获取初始状态
         total_reward = 0  # 每幕的总奖励
 
@@ -57,7 +58,6 @@ def train_dqn(env_name, episodes, batch_size, epsilon, min_epsilon, decay_rate):
             # 如果当前幕结束，记录奖励并跳出循环
             if done:
                 writer.add_scalar('Reward', total_reward, global_step=episode)
-                print(f"Episode: {episode}/{episodes}, Reward: {total_reward:.2f}, Epsilon: {epsilon:.4f}")
                 break
 
             # 更新状态
@@ -67,7 +67,7 @@ def train_dqn(env_name, episodes, batch_size, epsilon, min_epsilon, decay_rate):
         if (episode + 1) % SAVING_ITERATION == 0:
             dqn_path = f"{SAVE_PATH_PREFIX}/ckpt/dqn_{env_name}_{episode + 1}.pth"
             torch.save(dqn.eval_net.state_dict(), dqn_path)
-            print(f"Saved model: {dqn_path}")
+            tqdm.write(f"Saved model: {dqn_path}")  # 使用 tqdm 的写入方法避免打乱进度条
 
         # 更新 epsilon
         epsilon = max(min_epsilon, epsilon * decay_rate)
@@ -78,31 +78,28 @@ def train_dqn(env_name, episodes, batch_size, epsilon, min_epsilon, decay_rate):
 
 if __name__ == "__main__":
     # 训练 CartPole 环境
-    print("Training on CartPole-v1...")
-    train_dqn(
-        env_name="CartPole-v1",
-        episodes=EPISODES,
-        batch_size=BATCH_SIZE,
-        epsilon=1.0,
-        min_epsilon=EPSILON,
-        decay_rate=0.995
-    )
+    # train_dqn(
+    #     env_name="CartPole-v1",
+    #     episodes=EPISODES,
+    #     batch_size=BATCH_SIZE,
+    #     epsilon=1.0,
+    #     min_epsilon=EPSILON,
+    #     decay_rate=0.995
+    # )
 
-    # 训练 MountainCar 环境
-    print("Training on MountainCar-v0...")
-    train_dqn(
-        env_name="MountainCar-v0",
-        episodes=EPISODES,
-        batch_size=BATCH_SIZE,
-        epsilon=1.0,
-        min_epsilon=EPSILON,
-        decay_rate=0.995
-    )
+    # # 训练 MountainCar 环境
+    # train_dqn(
+    #     env_name="MountainCar-v0",
+    #     episodes=EPISODES,
+    #     batch_size=BATCH_SIZE,
+    #     epsilon=1.0,
+    #     min_epsilon=EPSILON,
+    #     decay_rate=0.995
+    # )
 
     # 训练 LunarLander 环境
-    print("Training on LunarLander-v2...")
     train_dqn(
-        env_name="LunarLander-v2",
+        env_name="LunarLander-v3",
         episodes=EPISODES,
         batch_size=BATCH_SIZE,
         epsilon=1.0,

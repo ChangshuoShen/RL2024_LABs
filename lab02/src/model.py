@@ -5,6 +5,14 @@ import random
 import collections
 import numpy as np
 
+
+'''
+DQN中的思想：
+    经验重演，降低序列的相关性
+    目标网络的思想，将评估和选择动作解耦
+'''
+
+
 # 定义 Q 网络模型（用于 DQN 和 Double DQN）
 class Model(nn.Module):
     """基本的 Q 网络模型，输入为状态向量，输出为动作的 Q 值"""
@@ -83,7 +91,7 @@ class Memory:
 # 定义 DQN 算法
 class DQN:
     """基本的 DQN 算法实现"""
-    def __init__(self, num_states, num_actions, lr, gamma, capacity, device='cpu'):
+    def __init__(self, num_states, num_actions, device, lr, gamma, capacity):
         """
         初始化 DQN 算法。
 
@@ -95,6 +103,7 @@ class DQN:
         - gamma: 折扣因子
         - capacity: 经验池容量
         """
+        print('model using device:', device)
         self.eval_net = Model(num_states, num_actions).to(device)  # 评估网络
         self.target_net = Model(num_states, num_actions).to(device)  # 目标网络
         self.optimizer = torch.optim.Adam(self.eval_net.parameters(), lr=lr)  # Adam 优化器
