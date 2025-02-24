@@ -1,1 +1,1 @@
-中国科学技术大学 强化学习（Graduate Student CLass）2024
+USTC Reinforcement Learning（Graduate Student CLass）2024 labs

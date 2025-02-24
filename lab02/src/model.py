@@ -8,8 +8,8 @@ import numpy as np
 
 '''
 DQN中的思想：
-    经验重演，降低序列的相关性
-    目标网络的思想，将评估和选择动作解耦
+        经验重演，降低序列的相关性
+        目标网络的思想，将评估和选择动作解耦
 '''
 
 
@@ -17,30 +17,16 @@ DQN中的思想：
 class Model(nn.Module):
     """基本的 Q 网络模型，输入为状态向量，输出为动作的 Q 值"""
     def __init__(self, num_inputs, num_actions):
-        """
-        初始化 Q 网络
-
-        参数：
-            - num_inputs: 状态空间的维度
-            - num_actions: 动作空间的数量
-        """
         super(Model, self).__init__()
-        self.fc1 = nn.Linear(num_inputs, 128)  # 第一层全连接层
-        self.fc2 = nn.Linear(128, 128)        # 第二层全连接层
-        self.out = nn.Linear(128, num_actions)  # 输出层（每个动作的 Q 值）
+        # 三层MLP
+        self.fc1 = nn.Linear(num_inputs, 128)
+        self.fc2 = nn.Linear(128, 128)
+        self.out = nn.Linear(128, num_actions)
 
     def forward(self, x):
-        """
-        前向传播过程
-
-        参数：
-            - x: 输入状态
-        返回：
-            - Q 值向量，每个动作对应一个值
-        """
-        x = F.relu(self.fc1(x))  # 激活函数 ReLU
+        x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        return self.out(x)  # 输出 Q 值向量
+        return self.out(x)
 
 
 # 定义用于存储单条经验的类
@@ -58,33 +44,12 @@ class Data:
 class Memory:
     """经验回放池，用于存储与随机采样训练数据"""
     def __init__(self, capacity):
-        """
-        初始化经验池
-
-        参数：
-            - capacity: 经验池的最大容量
-        """
         self.buffer = collections.deque(maxlen=capacity)
 
     def set(self, data):
-        """
-        向经验池中存储一条新经验
-
-        参数：
-            - data: 单条经验（Data 类的对象）
-        """
         self.buffer.append(data)
 
     def get(self, batch_size):
-        """
-        从经验池中随机采样一批经验
-
-        参数：
-            - batch_size: 批量大小
-
-        返回：
-            - 采样的经验列表
-        """
         return random.sample(self.buffer, batch_size)
 
 
@@ -93,9 +58,6 @@ class DQN:
     """基本的 DQN 算法实现"""
     def __init__(self, num_states, num_actions, device, lr, gamma, capacity):
         """
-        初始化 DQN 算法。
-
-        参数：
         - num_states: 状态空间维度
         - num_actions: 动作空间数量
         - device: 计算设备（CPU 或 GPU）
@@ -113,16 +75,7 @@ class DQN:
         self.learn_step_counter = 0  # 学习步数计数器
 
     def choose_action(self, state, epsilon):
-        """
-        根据 epsilon-greedy 策略选择动作
-
-        参数：
-        - state: 当前状态
-        - epsilon: 探索概率
-
-        返回：
-        - 选择的动作
-        """
+        """ epsilon-greedy选择动作 """
         if random.random() > epsilon:  # 按贪婪策略选择动作
             state = torch.tensor(state, dtype=torch.float).unsqueeze(0).to(self.device)
             with torch.no_grad():
@@ -133,12 +86,6 @@ class DQN:
         return action
 
     def learn(self, batch_size):
-        """
-        更新 Q 网络
-
-        参数：
-        - batch_size: 批量大小
-        """
         if len(self.memory.buffer) < batch_size:
             return
 
@@ -173,14 +120,9 @@ class DQN:
 
 # 定义 Dueling DQN 网络
 class DuelingModel(nn.Module):
-    """
-    Dueling DQN 模型，将 Q 值分解为状态价值 V(s) 和动作优势 A(s, a)
-    """
+    """Dueling DQN 模型，将 Q 值分解为状态价值 V(s) 和动作优势 A(s, a)"""
     def __init__(self, num_inputs, num_actions):
         """
-        初始化 Dueling DQN
-
-        参数：
         - num_inputs: 状态空间维度
         - num_actions: 动作空间数量
         """
@@ -193,14 +135,6 @@ class DuelingModel(nn.Module):
         self.advantage_stream = nn.Linear(128, num_actions)  # 动作优势 A(s, a)
 
     def forward(self, x):
-        """
-        前向传播过程
-
-        参数：
-            - x: 输入状态
-        返回：
-            - Q 值向量
-        """
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
 
@@ -218,12 +152,7 @@ class DoubleDQN(DQN):
     Double DQN 算法，通过分离动作选择和 Q 值计算，减少高估问题
     """
     def learn(self, batch_size):
-        """
-        更新 Q 网络，使用 Double DQN 算法
-
-        参数：
-        - batch_size: 批量大小
-        """
+        
         if len(self.memory.buffer) < batch_size:
             return
 
